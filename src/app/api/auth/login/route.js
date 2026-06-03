@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { supabase } from '@/lib/db'
 import { verifyPassword, generateToken } from '@/lib/auth'
 
 export async function POST(request) {
@@ -13,9 +13,19 @@ export async function POST(request) {
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    })
+    const { data: user, error } = await supabase
+      .from('User')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .maybeSingle()
+
+    if (error) {
+      console.error('[login] db error:', error)
+      return NextResponse.json(
+        { error: 'Server error — dobara try karein' },
+        { status: 500 }
+      )
+    }
 
     if (!user) {
       return NextResponse.json(
@@ -68,6 +78,7 @@ export async function POST(request) {
     return response
 
   } catch (error) {
+    console.error('[login] error:', error)
     return NextResponse.json(
       { error: 'Server error — dobara try karein' },
       { status: 500 }
