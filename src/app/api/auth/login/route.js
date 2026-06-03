@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/db'
-import { verifyPassword, generateToken } from '@/lib/auth'
+const prisma = require('@/lib/db')
+const { verifyPassword, generateToken } = require('@/lib/auth')
 
 export async function POST(request) {
   try {
@@ -13,19 +13,9 @@ export async function POST(request) {
       )
     }
 
-    const { data: user, error } = await supabase
-      .from('User')
-      .select('*')
-      .eq('email', email.toLowerCase())
-      .maybeSingle()
-
-    if (error) {
-      console.error('[login] db error:', error)
-      return NextResponse.json(
-        { error: 'Server error — dobara try karein' },
-        { status: 500 }
-      )
-    }
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() }
+    })
 
     if (!user) {
       return NextResponse.json(

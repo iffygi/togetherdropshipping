@@ -1,8 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
+const { PrismaClient } = require('@prisma/client')
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const globalForPrisma = globalThis
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+const prisma =
+  globalForPrisma.prisma ?? new PrismaClient()
 
-export default supabase
+if (process.env.NODE_ENV !== 'production')
+  globalForPrisma.prisma = prisma
+
+module.exports = prisma
