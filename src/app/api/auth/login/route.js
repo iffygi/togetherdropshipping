@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-const prisma = require('@/lib/db')
-const { verifyPassword, generateToken } = require('@/lib/auth')
+import { prisma } from '@/lib/db'
+import { verifyPassword, generateToken } from '@/lib/auth'
 
 export async function POST(request) {
   try {
@@ -68,7 +68,7 @@ export async function POST(request) {
     return response
 
   } catch (error) {
-    console.error('[login] error:', error)
+    console.error('[login] error:', error.message || error)
     return NextResponse.json(
       { error: 'Server error — dobara try karein' },
       { status: 500 }
